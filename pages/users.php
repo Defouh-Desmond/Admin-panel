@@ -1,6 +1,6 @@
 <?php
 require_once '../include/header.php';
-require_once '../classes/connection.php';
+
 
 // ==================== CONFIG ====================
 $limit = 50; // records per page

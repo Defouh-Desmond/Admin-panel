@@ -1,6 +1,6 @@
 <?php
 require_once '../include/header.php'; 
-require_once '../classes/connection.php';
+
 
 // Fetch all active products
 $query = "SELECT product_id, name, price, stock_quantity FROM products WHERE status = 'active' ORDER BY name ASC";

@@ -1,6 +1,6 @@
 <?php
 require_once '../include/header.php'; // starts session, includes navbar/sidebar
-require_once '../classes/connection.php'; // provides $mysqli
+ // provides $mysqli
 
 // Fetch all active categories
 $cat_query = "SELECT category_id, name FROM categories WHERE status='active' ORDER BY name ASC";

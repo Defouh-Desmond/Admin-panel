@@ -1,6 +1,6 @@
 <?php
 require_once '../include/header.php'; 
-require_once '../classes/connection.php';
+
 
 // Default year
 $year = isset($_GET['year']) ? intval($_GET['year']) : date('Y');

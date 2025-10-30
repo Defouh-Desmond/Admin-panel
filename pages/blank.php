@@ -1,7 +1,7 @@
 
 <?php
 require_once '../include/header.php'; // starts session, sets $admin_name, $admin_role, includes head, navbar, sidebar
-require_once '../classes/connection.php';
+
 ?>
         <!-- Page Content -->
         <div id="page-wrapper">

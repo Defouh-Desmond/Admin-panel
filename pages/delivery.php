@@ -1,6 +1,6 @@
 <?php
 require_once '../include/header.php';
-require_once '../classes/connection.php';
+
 
 if (!isset($_SESSION['admin_id'])) {
     header('Location: ../login.php');

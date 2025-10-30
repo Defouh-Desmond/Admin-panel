@@ -11,6 +11,8 @@ if (!isset($_SESSION['admin_id'])) {
 // Get admin details from session
 $admin_name = $_SESSION['admin_name'];
 $admin_role = $_SESSION['admin_role'];
+
+require_once '../classes/connection.php';
 ?>
 
 <!DOCTYPE html>

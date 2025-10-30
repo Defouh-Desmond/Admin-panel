@@ -1,6 +1,6 @@
 <?php
 require_once '../include/header.php'; // starts session, includes head, navbar, sidebar
-require_once '../classes/connection.php';
+
 
 $admin_id = $_SESSION['admin_id'] ?? null;
 if (!$admin_id) {

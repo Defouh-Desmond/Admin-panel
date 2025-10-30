@@ -1,6 +1,6 @@
 <?php
 require_once '../include/header.php';
-require_once '../classes/connection.php';
+
 
 // Validate product ID
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {

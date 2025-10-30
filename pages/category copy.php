@@ -1,6 +1,6 @@
 <?php
 require_once '../include/header.php';
-require_once '../classes/connection.php';
+
 
 $result = $mysqli->query("SELECT * FROM categories ORDER BY name ASC");
 $categories = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
