@@ -237,16 +237,44 @@ elseif ($action === 'upload_profile_picture') {
         exit;
     }
 
+    // --- Get current profile picture to delete it later ---
+    $stmtOld = $mysqli->prepare("SELECT profile_picture FROM users WHERE user_id = ?");
+    $stmtOld->bind_param("i", $user_id);
+    $stmtOld->execute();
+    $resultOld = $stmtOld->get_result();
+    $oldPic = '';
+    if ($resultOld->num_rows > 0) {
+        $data = $resultOld->fetch_assoc();
+        $oldPic = $data['profile_picture'];
+    }
+    $stmtOld->close();
+
+    // --- Generate new file name ---
     $profile_picture = 'profile_'.$user_id.'_'.time().'.'.$ext;
     $target = '../../uploads/'.$profile_picture;
 
+    // --- Move new file ---
     if (move_uploaded_file($file['tmp_name'], $target)) {
+
+        // --- Delete old file if it exists ---
+        if (!empty($oldPic)) {
+            $oldPath = '../../uploads/'.$oldPic;
+            if (file_exists($oldPath) && is_file($oldPath)) {
+                unlink($oldPath);
+            }
+        }
+
+        // --- Update database ---
         $stmt = $mysqli->prepare("UPDATE users SET profile_picture = ?, updated_at = NOW() WHERE user_id = ?");
         $stmt->bind_param("si", $profile_picture, $user_id);
         $stmt->execute();
         $stmt->close();
 
-        echo json_encode(['status'=>'success','message'=>'Profile picture updated successfully!']);
+        echo json_encode([
+            'status' => 'success',
+            'message' => 'Profile picture updated successfully!',
+            'new_picture' => $profile_picture
+        ]);
     } else {
         echo json_encode(['status'=>'error','message'=>'Failed to save profile picture.']);
     }
