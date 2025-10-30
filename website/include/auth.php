@@ -117,6 +117,26 @@ elseif ($action === 'login') {
 }
 
 /* ====================================================
+   GET PROFILE
+==================================================== */
+elseif ($action === 'get_profile') {
+    if (!isset($_SESSION['user_id'])) {
+        echo json_encode(['status'=>'error','message'=>'Not logged in.']);
+        exit;
+    }
+
+    $user_id = $_SESSION['user_id'];
+    $stmt = $mysqli->prepare("SELECT full_name, email, phone, address, profile_picture FROM users WHERE user_id = ?");
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $user = $result->fetch_assoc();
+
+    echo json_encode(['status'=>'success','data'=>$user]);
+    $stmt->close();
+}
+
+/* ====================================================
    EDIT PROFILE
 ==================================================== */
 elseif ($action === 'edit_profile') {
@@ -126,20 +146,110 @@ elseif ($action === 'edit_profile') {
     }
 
     $user_id = $_SESSION['user_id'];
-    $full_name = trim($_POST['full_name']);
+    $full_name = trim($_POST['name']);
+    $email = trim($_POST['email']);
     $phone = trim($_POST['phone']);
     $address = trim($_POST['address']);
+    $password = $_POST['password'] ?? '';
+    $confirm_password = $_POST['confirm_password'] ?? '';
 
-    $stmt = $mysqli->prepare("UPDATE users SET full_name = ?, phone = ?, address = ?, updated_at = NOW() WHERE user_id = ?");
-    $stmt->bind_param("sssi", $full_name, $phone, $address, $user_id);
+    // Validate password match if changing
+    if (!empty($password) && $password !== $confirm_password) {
+        echo json_encode(['status'=>'error','message'=>'Passwords do not match.']);
+        exit;
+    }
 
-    if ($stmt->execute()) {
+    // Check for email or phone duplicates
+    $stmtCheck = $mysqli->prepare("SELECT user_id FROM users WHERE (email = ? OR phone = ?) AND user_id != ?");
+    $stmtCheck->bind_param("ssi", $email, $phone, $user_id);
+    $stmtCheck->execute();
+    $resCheck = $stmtCheck->get_result();
+    if($resCheck->num_rows > 0) {
+        echo json_encode(['status'=>'error','message'=>'Email or phone already in use.']);
+        exit;
+    }
+    $stmtCheck->close();
+
+    // Handle optional profile picture
+    $profile_picture = '';
+    if(isset($_FILES['profile_picture']) && $_FILES['profile_picture']['error'] === 0){
+        $ext = pathinfo($_FILES['profile_picture']['name'], PATHINFO_EXTENSION);
+        $profile_picture = 'profile_'.$user_id.'_'.time().'.'.$ext;
+        $target = '../../uploads/'.$profile_picture;
+        move_uploaded_file($_FILES['profile_picture']['tmp_name'], $target);
+    }
+
+    // Build update query
+    $updateFields = "full_name = ?, email = ?, phone = ?, address = ?";
+    $params = [$full_name, $email, $phone, $address];
+    $types = "ssss";
+
+    if(!empty($password)){
+        $updateFields .= ", password_hash = ?";
+        $password_hash = password_hash($password, PASSWORD_DEFAULT);
+        $params[] = $password_hash;
+        $types .= "s";
+    }
+
+    if(!empty($profile_picture)){
+        $updateFields .= ", profile_picture = ?";
+        $params[] = $profile_picture;
+        $types .= "s";
+    }
+
+    $params[] = $user_id;
+    $types .= "i";
+
+    $sql = "UPDATE users SET $updateFields, updated_at = NOW() WHERE user_id = ?";
+    $stmt = $mysqli->prepare($sql);
+    $stmt->bind_param($types, ...$params);
+
+    if($stmt->execute()){
         echo json_encode(['status'=>'success','message'=>'Profile updated successfully!']);
     } else {
         echo json_encode(['status'=>'error','message'=>'Failed to update profile.']);
     }
-
     $stmt->close();
+}
+
+/* ====================================================
+   UPLOAD PROFILE PICTURE (Instant Upload)
+==================================================== */
+elseif ($action === 'upload_profile_picture') {
+    if (!isset($_SESSION['user_id'])) {
+        echo json_encode(['status'=>'error','message'=>'Not logged in.']);
+        exit;
+    }
+
+    $user_id = $_SESSION['user_id'];
+
+    if (!isset($_FILES['profile_picture']) || $_FILES['profile_picture']['error'] !== 0) {
+        echo json_encode(['status'=>'error','message'=>'No image uploaded or upload error.']);
+        exit;
+    }
+
+    $file = $_FILES['profile_picture'];
+    $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+    $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+
+    if (!in_array($ext, $allowed)) {
+        echo json_encode(['status'=>'error','message'=>'Invalid image format. Only JPG, PNG, GIF, or WEBP allowed.']);
+        exit;
+    }
+
+    $profile_picture = 'profile_'.$user_id.'_'.time().'.'.$ext;
+    $target = '../../uploads/'.$profile_picture;
+
+    if (move_uploaded_file($file['tmp_name'], $target)) {
+        $stmt = $mysqli->prepare("UPDATE users SET profile_picture = ?, updated_at = NOW() WHERE user_id = ?");
+        $stmt->bind_param("si", $profile_picture, $user_id);
+        $stmt->execute();
+        $stmt->close();
+
+        echo json_encode(['status'=>'success','message'=>'Profile picture updated successfully!']);
+    } else {
+        echo json_encode(['status'=>'error','message'=>'Failed to save profile picture.']);
+    }
 }
 
 /* ====================================================

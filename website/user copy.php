@@ -180,10 +180,15 @@
                                     </div>
                                     <div class="col-md-6 col-sm-12">
                                         <div class="form-group">
-                                            <label for="address">Address</label>
-                                            <input type="text" class="input" id="address" name="address" value="123 Main St, Yaounde" required>
+                                            <label for="dob">Date of Birth</label>
+                                            <input type="date" class="input" id="dob" name="dob" value="1990-05-10">
                                         </div>
                                     </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="address">Address</label>
+                                    <textarea class="input" id="address" name="address" rows="3">123 Main Street, Douala, Cameroon</textarea>
                                 </div>
 
                                 <div class="row">
@@ -488,121 +493,48 @@
         <script type="text/javascript" src="js/owl.carousel.min.js"></script>
         <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
         <script type="text/javascript" src="js/google-map.js"></script>
-        <script type="text/javascript" src="js/main.js"></script>  
-
+        <script type="text/javascript" src="js/main.js"></script>
         <script>
-        $(document).ready(function() {
-
-            // ----------------------------
-            // Fetch user profile on load
-            // ----------------------------
-            function loadUserProfile() {
-                $.ajax({
-                    url: 'include/auth.php',
-                    type: 'POST',
-                    data: { action: 'get_profile' },
-                    dataType: 'json',
-                    success: function(response) {
-                        if (response.status === 'success') {
-                            const data = response.data;
-                            $('#full-name').val(data.full_name);
-                            $('#email').val(data.email);
-                            $('#phone').val(data.phone);
-                            $('#address').val(data.address);
-                            if (data.profile_picture) {
-                                $('.profile-picture img').attr('src', '../uploads/' + data.profile_picture);
-                            }
-                        } else {
-                            alert(response.message);
-                        }
-                    },
-                    error: function() {
-                        alert('Failed to fetch profile data.');
-                    }
+            $(document).ready(function() {
+                $('#updateProfileBtn').on('click', function() {
+                    $('#profileUpdatedModal').modal('show'); // show modal
+                    $('.edit-profile-form form')[0].reset(); // reset form fields
                 });
-            }
-
-            loadUserProfile();
-
-            // ----------------------------
-            // Profile picture upload instantly
-            // ----------------------------
-            $('#profileUpload').on('change', function() {
-                const file = this.files[0];
-                if (!file) return;
-
-                // Preview the image
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    $('.profile-picture img').attr('src', e.target.result);
-                };
-                reader.readAsDataURL(file);
-
-                // Upload the image immediately
-                const formData = new FormData();
-                formData.append('action', 'upload_profile_picture');
-                formData.append('profile_picture', file);
-
-                $.ajax({
-                    url: 'include/auth.php',
-                    type: 'POST',
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    dataType: 'json',
-                    success: function(response) {
-                        if (response.status === 'success') {
-                            // Optional toast or small success message
-                            console.log('Profile picture updated successfully.');
-                        } else {
-                            alert(response.message || 'Failed to upload profile picture.');
-                            loadUserProfile(); // revert to old picture
-                        }
-                    },
-                    error: function() {
-                        alert('Error uploading profile picture.');
+            });
+        
+            $(document).ready(function() {
+                var points = 320; // initial user points
+            
+                $('.redeem-btn').on('click', function() {
+                    var cost = parseInt($(this).data('cost'));
+                    if(points >= cost) {
+                        points -= cost;
+                        $('.points-count').text(points);
+                        $('#modal-message').text(`You have successfully redeemed this reward for ${cost} points!`);
+                    } else {
+                        $('#modal-message').text("Sorry, you don't have enough points for this reward.");
                     }
+                    $('#redeemModal').modal('show');
                 });
             });
 
-            // ----------------------------
-            // Update profile via AJAX
-            // ----------------------------
-            $('#updateProfileBtn').on('click', function() {
-                const formData = new FormData();
-                formData.append('action', 'edit_profile');
-                formData.append('name', $('#full-name').val());
-                formData.append('email', $('#email').val());
-                formData.append('phone', $('#phone').val());
-                formData.append('address', $('#address').val());
-                formData.append('password', $('#password').val());
-                formData.append('confirm_password', $('#confirm-password').val());
+            // Select all point cards
+            var pointCards = document.querySelectorAll('.points-card');
+            var pointsAlert = document.getElementById('points-alert');
 
-                $.ajax({
-                    url: 'include/auth.php',
-                    type: 'POST',
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    dataType: 'json',
-                    success: function(response) {
-                        if (response.status === 'success') {
-                            $('#profileUpdatedModal').modal('show');
-                            loadUserProfile();
-                            $('#password').val('');
-                            $('#confirm-password').val('');
-                        } else {
-                            alert(response.message);
-                        }
-                    },
-                    error: function() {
-                        alert('Failed to update profile.');
-                    }
+            pointCards.forEach(function(card) {
+                card.addEventListener('click', function() {
+                    var points = card.getAttribute('data-points');
+                    pointsAlert.textContent = 'You can earn: ' + points;
+                    pointsAlert.style.display = 'block';
+                    // Automatically hide after 3 seconds
+                    setTimeout(function() {
+                        pointsAlert.style.display = 'none';
+                    }, 3000);
                 });
             });
 
-        });
-        </script>
+        </script>           
 
     </body>
 </html>

@@ -109,7 +109,7 @@
 
                     $.ajax({
                         type: 'POST',
-                        url: 'auth.php',
+                        url: 'include/auth.php',
                         data: $(this).serialize() + '&action=login',
                         dataType: 'json',
                         success: function(response){
