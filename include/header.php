@@ -23,7 +23,7 @@ $admin_role = $_SESSION['admin_role'];
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Startmin - Bootstrap Admin Theme</title>
+    <title>Licrestor-admin</title>
 
     <!-- Bootstrap Core CSS -->
     <link href="../css/bootstrap.min.css" rel="stylesheet">
@@ -159,10 +159,10 @@ $admin_role = $_SESSION['admin_role'];
                         <a href="dashboard.php"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
                     </li>
                     <li>
-                        <a href="analyze.php"><i class="fa fa-dashboard fa-fw"></i> Analysis</a>
+                        <a href="analyze.php"><i class="fa fa-pie-chart fa-fw"></i> Analysis</a>
                     </li>
                     <li>
-                        <a href="forecast.php"><i class="fa fa-dashboard fa-fw"></i> Forecast</a>
+                        <a href="forecast.php"><i class="fa fa-line-chart fa-fw"></i> Forecast</a>
                     </li>
                     <li>
                         <a href="#"><i class="fa fa-shopping-bag fa-fw"></i> Sales<span class="fa arrow"></span></a>

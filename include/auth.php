@@ -72,16 +72,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $password = $_POST['password'];
 
         if (empty($email) || empty($password)) {
-            echo json_encode(['status'=>'error','message'=>'Email and password are required.']);
+            echo json_encode(['status' => 'error', 'message' => 'Email and password are required.']);
             exit;
         }
 
-        // Fetch user + admin info including user status
+        // Fetch user + admin info
         $stmt = $mysqli->prepare("
-            SELECT u.user_id, u.password_hash, u.full_name, u.status, a.role, a.active
+            SELECT 
+                u.user_id,
+                u.password_hash,
+                u.full_name,
+                u.status,
+                u.block,
+                u.suspend,
+                a.role,
+                a.active
             FROM users u
             INNER JOIN admins a ON u.user_id = a.user_id
             WHERE u.email = ?
+            LIMIT 1
         ");
         $stmt->bind_param("s", $email);
         $stmt->execute();
@@ -90,24 +99,81 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($result->num_rows === 1) {
             $row = $result->fetch_assoc();
 
-            // Check if admin account is active
+            // ✅ Check if admin account is active
             if ($row['active'] != 1) {
-                echo json_encode(['status'=>'error','message'=>'Admin account is inactive.']);
+                echo json_encode(['status' => 'error', 'message' => 'Admin account is inactive.']);
                 exit;
             }
 
-            // Check if user status is suspended or blocked
-            if ($row['status'] === 'suspended') {
-                echo json_encode(['status'=>'error','message'=>'Your account is suspended.']);
+            // ✅ Check if user is blocked
+            if ($row['block'] == 1 || $row['status'] === 'blocked') {
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => 'Your account has been blocked. Please contact support.'
+                ]);
                 exit;
             }
 
-            if ($row['status'] === 'blocked') {
-                echo json_encode(['status'=>'error','message'=>'Your account is blocked.']);
-                exit;
+            // ✅ Check if user is suspended
+            if ($row['suspend'] == 1 || $row['status'] === 'suspended') {
+
+                // Fetch latest suspension record
+                $suspStmt = $mysqli->prepare("
+                    SELECT suspension_id, suspension_due 
+                    FROM suspended_users 
+                    WHERE user_id = ? 
+                    ORDER BY suspended_at DESC 
+                    LIMIT 1
+                ");
+                $suspStmt->bind_param("i", $row['user_id']);
+                $suspStmt->execute();
+                $suspResult = $suspStmt->get_result();
+
+                if ($suspResult->num_rows > 0) {
+                    $suspData = $suspResult->fetch_assoc();
+                    $suspension_id = $suspData['suspension_id'];
+                    $suspension_due = $suspData['suspension_due'];
+
+                    $currentDate = new DateTime();
+                    $dueDate = new DateTime($suspension_due);
+
+                    // Check if suspension is still active
+                    if ($dueDate > $currentDate) {
+                        $formattedDate = $dueDate->format("l, F j, Y");
+                        echo json_encode([
+                            'status' => 'error',
+                            'message' => 'Your account is suspended until ' . $formattedDate . '.'
+                        ]);
+                        exit;
+                    } else {
+                        // ✅ Suspension expired — reactivate the account
+                        $updateStmt = $mysqli->prepare("
+                            UPDATE users 
+                            SET suspend = 0, status = 'offline' 
+                            WHERE user_id = ?
+                        ");
+                        $updateStmt->bind_param("i", $row['user_id']);
+                        $updateStmt->execute();
+                        $updateStmt->close();
+
+                        // 🧹 Delete expired suspension record
+                        $delStmt = $mysqli->prepare("DELETE FROM suspended_users WHERE suspension_id = ?");
+                        $delStmt->bind_param("i", $suspension_id);
+                        $delStmt->execute();
+                        $delStmt->close();
+                    }
+                } else {
+                    // No record found but suspend flag is set
+                    echo json_encode([
+                        'status' => 'error',
+                        'message' => 'Your account is currently suspended.'
+                    ]);
+                    exit;
+                }
+                $suspStmt->close();
             }
 
-            // Verify password
+            // ✅ Verify password
             if (password_verify($password, $row['password_hash'])) {
                 // Set session
                 $_SESSION['admin_id'] = $row['user_id'];
@@ -115,22 +181,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['admin_role'] = $row['role'];
 
                 // Update last_login in admins table
-                $stmt2 = $mysqli->prepare("UPDATE admins SET last_login = NOW() WHERE user_id = ? ");
+                $stmt2 = $mysqli->prepare("UPDATE admins SET last_login = NOW() WHERE user_id = ?");
                 $stmt2->bind_param("i", $row['user_id']);
                 $stmt2->execute();
                 $stmt2->close();
 
-                echo json_encode(['status'=>'success','message'=>'Login successful!']);
+                // Update user status to online
+                $stmt3 = $mysqli->prepare("UPDATE users SET status = 'online', last_login = NOW() WHERE user_id = ?");
+                $stmt3->bind_param("i", $row['user_id']);
+                $stmt3->execute();
+                $stmt3->close();
+
+                echo json_encode(['status' => 'success', 'message' => 'Login successful!']);
             } else {
-                echo json_encode(['status'=>'error','message'=>'Incorrect password.']);
+                echo json_encode(['status' => 'error', 'message' => 'Incorrect password.']);
             }
+
         } else {
-            echo json_encode(['status'=>'error','message'=>'Admin not found.']);
+            echo json_encode(['status' => 'error', 'message' => 'Admin not found.']);
         }
 
         $stmt->close();
-
-    } else {
+    }
+     else {
         echo json_encode(['status'=>'error','message'=>'Invalid action.']);
     }
 
