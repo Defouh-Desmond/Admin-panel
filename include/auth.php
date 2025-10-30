@@ -208,7 +208,74 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $mysqli->close();
-} else {
-    echo json_encode(['status'=>'error','message'=>'Invalid request method.']);
-}
+ 
+    // ---------------------------
+    // BECOME ADMIN LOGIC
+    // ---------------------------
+    
+    }elseif ($action === 'become_admin') {
+        $email = trim($_POST['email']);
+        $password = $_POST['password'];
+
+        if (empty($email) || empty($password)) {
+            echo json_encode(['status' => 'error', 'message' => 'Email and password are required.']);
+            exit;
+        }
+
+        // Check if user exists in users table
+        $stmt = $mysqli->prepare("SELECT user_id, full_name, password_hash, block, suspend, status FROM users WHERE email = ? LIMIT 1");
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result->num_rows === 1) {
+            $user = $result->fetch_assoc();
+
+            // Check block/suspend status
+            if ($user['block'] == 1) {
+                echo json_encode(['status' => 'error', 'message' => 'Your account is blocked. You cannot become an admin.']);
+                exit;
+            }
+
+            if ($user['suspend'] == 1) {
+                echo json_encode(['status' => 'error', 'message' => 'Your account is suspended. Please wait until suspension ends.']);
+                exit;
+            }
+
+            // Verify password
+            if (!password_verify($password, $user['password_hash'])) {
+                echo json_encode(['status' => 'error', 'message' => 'Incorrect password.']);
+                exit;
+            }
+
+            // Check if already admin
+            $checkAdmin = $mysqli->prepare("SELECT admin_id FROM admins WHERE user_id = ? LIMIT 1");
+            $checkAdmin->bind_param("i", $user['user_id']);
+            $checkAdmin->execute();
+            $adminResult = $checkAdmin->get_result();
+
+            if ($adminResult->num_rows > 0) {
+                echo json_encode(['status' => 'error', 'message' => 'You are already an admin.']);
+                exit;
+            }
+
+            // Insert new admin record
+            $insert = $mysqli->prepare("INSERT INTO admins (user_id, role, active, created_at) VALUES (?, 'standard', 1, NOW())");
+            $insert->bind_param("i", $user['user_id']);
+
+            if ($insert->execute()) {
+                echo json_encode(['status' => 'success', 'message' => 'You are now an admin! You can log in to the admin dashboard.']);
+            } else {
+                echo json_encode(['status' => 'error', 'message' => 'Error creating admin account. Please try again.']);
+            }
+
+            $insert->close();
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'No user found with that email. Please sign up first.']);
+        }
+
+        $stmt->close();
+    }else {
+        echo json_encode(['status'=>'error','message'=>'Invalid request method.']);
+    }
 ?>
