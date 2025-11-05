@@ -1,11 +1,12 @@
 <?php
-    if (!isset($_SESSION['user_id'])) {
-        echo "
-            <script> window.location.href = 'login.php'; </script>
-        ";
-        exit;
-    }
+session_start();
+
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit;
+}
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
