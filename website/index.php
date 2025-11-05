@@ -73,7 +73,7 @@
                         <li><a href="reservation.html">Reservation</a></li>
                         <li><a href="event.html">Events</a></li>
                         <li><a href="about.html">About</a></li>
-                        <li><a href="contact.html">Contact</a></li>
+                        <li><a href="contact.php">Contact</a></li>
                     </ul>
                     <!-- /nav -->
 
@@ -731,7 +731,7 @@
                     </div>
                     <div class="contact-content">
                         <p>Visit or contact us for reservations, events, or general information. kindly visit our
-                            contact page for more inquries <a href="contact.html">here</a></p>
+                            contact page for more inquries <a href="contact.php">here</a></p>
                         <h3>Tel: <a href="#">(+237) 674-467-985</a></h3>
                         <p>Address: Ekounou Yaounde, Cameroon</p>
                         <p>Email: <a href="#">info@licrestaurant.cm</a></p>

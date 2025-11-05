@@ -67,10 +67,10 @@ elseif ($action === 'login') {
 
     // Determine whether we're logging in via email or phone
     if (!empty($email)) {
-        $stmt = $mysqli->prepare("SELECT user_id, full_name, password_hash, block, suspend FROM users WHERE email = ? LIMIT 1");
+        $stmt = $mysqli->prepare("SELECT user_id, full_name, email, password_hash, block, suspend FROM users WHERE email = ? LIMIT 1");
         $stmt->bind_param("s", $email);
     } else {
-        $stmt = $mysqli->prepare("SELECT user_id, full_name, password_hash, block, suspend FROM users WHERE phone = ? LIMIT 1");
+        $stmt = $mysqli->prepare("SELECT user_id, full_name, email, password_hash, block, suspend FROM users WHERE phone = ? LIMIT 1");
         $stmt->bind_param("s", $phone);
     }
 
@@ -109,6 +109,7 @@ elseif ($action === 'login') {
         if (password_verify($password, $user['password_hash'])) {
             $_SESSION['user_id'] = $user['user_id'];
             $_SESSION['full_name'] = $user['full_name'];
+            $_SESSION['email'] = $user['email'];
 
             // Update last login & status
             $updateStmt = $mysqli->prepare("UPDATE users SET last_login = NOW(), status = 'online' WHERE user_id = ?");

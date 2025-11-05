@@ -1,3 +1,4 @@
+<?php session_start(); ?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -156,27 +157,37 @@
                 <div class="col-md-7">
                     <div class="contact-form-box">
                         <h3 class="form-title">Send Us a Message</h3>
-                        <form id="main-contact-form" method="post" action="#">
+
+                        <p id="contact-success" class="text-success text-center" style="display:none;"></p>
+                        <p id="contact-error" class="text-danger text-center" style="display:none;"></p>
+
+                        <form id="main-contact-form">
                             <div class="row">
                                 <div class="col-sm-6">
                                     <div class="form-group">
-                                        <input type="text" class="input" name="name" placeholder="Your Name" required>
+                                        <input type="text" class="input" name="name" placeholder="Your Name"
+                                            value="<?php echo isset($_SESSION['full_name']) ? htmlspecialchars($_SESSION['full_name']) : ''; ?>"
+                                            <?php echo isset($_SESSION['full_name']) ? 'readonly' : '' ; ?> required>
                                     </div>
                                 </div>
+
                                 <div class="col-sm-6">
                                     <div class="form-group">
                                         <input type="email" class="input" name="email" placeholder="Your Email"
-                                            required>
+                                            value="<?php echo isset($_SESSION['email']) ? htmlspecialchars($_SESSION['email']) : ''; ?>"
+                                            <?php echo isset($_SESSION['email']) ? 'readonly' : '' ; ?> required>
                                     </div>
                                 </div>
                             </div>
+
                             <div class="form-group">
                                 <input type="text" class="input" name="subject" placeholder="Subject" required>
                             </div>
+
                             <div class="form-group">
-                                <textarea class="input" name="message" rows="5" placeholder="Your Message"
-                                    required></textarea>
+                                <textarea class="input" name="message" rows="5" placeholder="Your Message" required></textarea>
                             </div>
+
                             <button type="submit" class="main-button">Send Message</button>
                         </form>
                     </div>
@@ -372,8 +383,6 @@
     <script type="text/javascript" src="js/jquery.min.js"></script>
     <script type="text/javascript" src="js/bootstrap.min.js"></script>
     <script type="text/javascript" src="js/owl.carousel.min.js"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
-    <script type="text/javascript" src="js/google-map.js"></script>
     <script type="text/javascript" src="js/main.js"></script>
     <script>
         $(document).ready(function () {
@@ -388,7 +397,49 @@
                 });
         });
     </script>
+<script>
+$(document).ready(function(){
 
+    $('#main-contact-form').on('submit', function(e){
+        e.preventDefault();
+
+        // Hide previous messages
+        $('#contact-success').hide();
+        $('#contact-error').hide();
+
+        // Disable the submit button to prevent multiple submissions
+        const $submitBtn = $(this).find('button[type="submit"]');
+        $submitBtn.prop('disabled', true).text('Sending...');
+
+        // Collect form data
+        const formData = $(this).serialize();
+
+        $.ajax({
+            type: 'POST',
+            url: 'include/contact.php',
+            data: formData,
+            dataType: 'json',
+            success: function(response){
+                if(response.status === 'success'){
+                    $('#contact-success').text(response.message).show();
+                    $('#main-contact-form')[0].reset();
+                } else {
+                    $('#contact-error').text(response.message).show();
+                }
+            },
+            error: function(xhr, status, error){
+                console.error(xhr.responseText);
+                $('#contact-error').text('Something went wrong. Please try again later.').show();
+            },
+            complete: function(){
+                // Re-enable the submit button
+                $submitBtn.prop('disabled', false).text('Send Message');
+            }
+        });
+    });
+
+});
+</script>
 
 </body>
 

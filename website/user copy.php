@@ -69,7 +69,7 @@
 						<li><a href="reservation.html">Reservation</a></li>
 						<li><a href="event.html">Events</a></li>
 						<li><a href="about.html">About</a></li>
-						<li><a href="contact.html">Contact</a></li>
+						<li><a href="contact.php">Contact</a></li>
 					</ul>
                     <!-- /nav -->
 
