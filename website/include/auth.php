@@ -1,4 +1,7 @@
 <?php
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
 session_start();
 header('Content-Type: application/json');
 
@@ -286,84 +289,6 @@ elseif ($action === 'upload_profile_picture') {
         ]);
     } else {
         echo json_encode(['status'=>'error','message'=>'Failed to save profile picture.']);
-    }
-}
-
-/* ====================================================
-   FORGOT PASSWORD (Email or Phone)
-==================================================== */
-elseif ($action === 'forgot_password') {
-    $email = $_POST['email'] ?? '';
-    $phone = $_POST['phone'] ?? '';
-
-    if (empty($email) && empty($phone)) {
-        echo json_encode(['status'=>'error','message'=>'Please provide your email or phone.']);
-        exit;
-    }
-
-    // Find user by email or phone
-    if (!empty($email)) {
-        $stmt = $mysqli->prepare("SELECT user_id, full_name, email, phone FROM users WHERE email = ? LIMIT 1");
-        $stmt->bind_param("s", $email);
-    } else {
-        $stmt = $mysqli->prepare("SELECT user_id, full_name, email, phone FROM users WHERE phone = ? LIMIT 1");
-        $stmt->bind_param("s", $phone);
-    }
-
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    if ($result->num_rows !== 1) {
-        echo json_encode(['status'=>'error','message'=>'User not found.']);
-        exit;
-    }
-
-    $user = $result->fetch_assoc();
-    $stmt->close();
-
-    // Generate secure token
-    $token = bin2hex(random_bytes(32));
-    $expires_at = date("Y-m-d H:i:s", strtotime("+1 hour")); // Token expires in 1 hour
-
-    // Store token in password_resets table
-    $stmtInsert = $mysqli->prepare("INSERT INTO password_resets (user_id, token, expires_at) VALUES (?, ?, ?)");
-    $stmtInsert->bind_param("iss", $user['user_id'], $token, $expires_at);
-    $stmtInsert->execute();
-    $stmtInsert->close();
-
-    // Prepare reset link
-    $resetLink = "https://yourdomain.com/reset_password.php?token=$token";
-
-    // If email is available, send via email
-    if (!empty($user['email'])) {
-        $to = $user['email'];
-        $subject = "Password Reset Request";
-        $message = "Hi {$user['full_name']},\n\n";
-        $message .= "We received a request to reset your password.\n";
-        $message .= "Click the link below to reset your password:\n\n";
-        $message .= "$resetLink\n\n";
-        $message .= "If you didn't request this, ignore this email.\n";
-        $headers = "From: no-reply@yourdomain.com\r\n";
-
-        if (mail($to, $subject, $message, $headers)) {
-            echo json_encode(['status'=>'success','message'=>'A password reset link has been sent to your email.']);
-        } else {
-            echo json_encode(['status'=>'error','message'=>'Failed to send reset email. Please try again later.']);
-        }
-    } 
-    // If phone is provided, send SMS (requires SMS gateway)
-    else if (!empty($user['phone'])) {
-        // Example placeholder for SMS sending
-        $smsSent = true; // Replace with your SMS API call
-
-        if ($smsSent) {
-            echo json_encode(['status'=>'success','message'=>'A password reset link has been sent to your phone via SMS.']);
-        } else {
-            echo json_encode(['status'=>'error','message'=>'Failed to send reset SMS. Please try again later.']);
-        }
-    } 
-    else {
-        echo json_encode(['status'=>'error','message'=>'No valid contact method found.']);
     }
 }
 

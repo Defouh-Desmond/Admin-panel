@@ -51,7 +51,7 @@
 
                 <!-- social links -->
                 <ul class="social-nav">
-                    <li><a href="user.html" class="user" title="User Account Info"><i class="fa fa-user"></i></a></li>
+                    <li><a href="user.php" class="user" title="User Account Info"><i class="fa fa-user"></i></a></li>
                     <li><a href="menu.html#cart-section" class="user" title="User Cart"><i
                                 class="fa fa-shopping-cart"></i></a></li>
                 </ul>
