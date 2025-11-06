@@ -160,6 +160,22 @@ ul,ol{
 	opacity:0.8;
 }
 
+/* Disabled button style */
+.main-button[disabled],
+.main-button:disabled {
+	background-color: #ccc !important;
+	cursor: not-allowed;
+	opacity: 0.7;
+	pointer-events: none;
+	transition: all 0.3s ease;
+}
+
+/* add hover effect when enabled */
+.main-button:not([disabled]):hover {
+	color: #FFF;
+	opacity: 0.8;
+}
+
 /* --- Inputs --- */
 .input {
 	width: 100%;
@@ -1097,7 +1113,7 @@ textarea.input {
 }
 
 .step-card .step-icon, .request-icon {
-    background-color: #f36500;
+    background-color: #000000a9;
     color: #fff;
     font-size: 28px;
     width: 70px;
@@ -1220,7 +1236,7 @@ textarea.input {
 	top: 0;
 	width: 60px;
 	height: 60px;
-	background: #f36700;
+	background: #000000c0;
 	text-align: center;
 }
 
@@ -1248,13 +1264,13 @@ textarea.input {
 .event  .event-day:before {
 	left:0;
 	border-width: 20px 60px 0 0;
-	border-color: #f36500 transparent transparent;
+	border-color: #000000c0 transparent transparent;
 }
 
 .event  .event-day:after {
 	right:0;
 	border-width: 0 60px 20px 0;
-	border-color: transparent #f36500 transparent;
+	border-color: transparent #000000c0 transparent;
 }
 
 .event .event-contents {
@@ -2259,8 +2275,7 @@ textarea.input {
 }
 
 .reservation-table th {
-    background-color: #f36500;
-    color: #fff;
+    color: #333;
     font-weight: bold;
 }
 

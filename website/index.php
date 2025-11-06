@@ -37,7 +37,7 @@
             <div class="container">
 
                 <!-- logo -->
-                <a href="index.html" class="logo">
+                <a href="index.php" class="logo">
                     <img src="img/logo.png" alt="logo">
                     <h2>LICRESTOR</h2>
                 </a>
@@ -68,9 +68,9 @@
 
                     <!-- nav -->
                     <ul class="main-nav nav navbar-nav">
-                        <li><a href="index.html">Home</a></li>
+                        <li><a href="index.php">Home</a></li>
                         <li><a href="menu.html">Menu</a></li>
-                        <li><a href="reservation.html">Reservation</a></li>
+                        <li><a href="reservation.php">Reservation</a></li>
                         <li><a href="event.html">Events</a></li>
                         <li><a href="about.html">About</a></li>
                         <li><a href="contact.php">Contact</a></li>
@@ -117,7 +117,7 @@
                                 every moment.</h4>
                             <div class="flex" style="margin-top:20px;">
                                 <a href="menu.html" class="main-button">View Menu</a>
-                                <a href="menu.html" class="main-button" style="margin-left: 10px;">Reserve</a>
+                                <a href="reservation.php" class="main-button" style="margin-left: 10px;">Reserve</a>
                             </div>
                         </div>
                     </div>
@@ -499,7 +499,7 @@
                 </div>
             </div>
             <div class="col-md-12" style="text-align: center; margin-top: 20px;">
-                <a href="reservation.html" class="main-button">Reserve Now</a>
+                <a href="reservation.php" class="main-button">Reserve Now</a>
             </div>
         </div>
     </div>

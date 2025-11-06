@@ -2,8 +2,8 @@
 session_start();
 
 if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
-    exit;
+    // header("Location: login.php");
+    // exit;
 }
 ?>
 
@@ -44,7 +44,7 @@ if (!isset($_SESSION['user_id'])) {
                 <div class="container">
 
                 <!-- logo -->
-                <a href="index.html" class="logo">
+                <a href="index.php" class="logo">
                     <img src="img/logo.png" alt="logo">
                     <h2>LICRESTOR</h2>
                 </a>
@@ -74,9 +74,9 @@ if (!isset($_SESSION['user_id'])) {
 
                     <!-- nav -->
                     <ul class="main-nav nav navbar-nav">
-						<li><a href="index.html">Home</a></li>
+						<li><a href="index.php">Home</a></li>
 						<li><a href="menu.html">Menu</a></li>
-						<li><a href="reservation.html">Reservation</a></li>
+						<li><a href="reservation.php">Reservation</a></li>
 						<li><a href="event.html">Events</a></li>
 						<li><a href="about.html">About</a></li>
 						<li><a href="contact.php">Contact</a></li>
@@ -145,8 +145,8 @@ if (!isset($_SESSION['user_id'])) {
                             <div class="profile-picture">
                                 <img src="img/avatar.png" alt="User Profile" class="img-responsive">
                             </div>
-                            <h3 class="user-name">John Doe</h3>
-                            <p class="user-email">johndoe@email.com</p>
+                            <h3 class="user-name" id="pro-name">John Doe</h3>
+                            <p class="user-email" id="pro-email">johndoe@email.com</p>
 
                             <ul class="account-stats list-unstyled">
                                 <li><strong>Reservations:</strong> 12</li>
@@ -496,8 +496,6 @@ if (!isset($_SESSION['user_id'])) {
         <script type="text/javascript" src="js/jquery.min.js"></script>
         <script type="text/javascript" src="js/bootstrap.min.js"></script>
         <script type="text/javascript" src="js/owl.carousel.min.js"></script>
-        <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
-        <script type="text/javascript" src="js/google-map.js"></script>
         <script type="text/javascript" src="js/main.js"></script>  
 
         <script>
@@ -516,7 +514,9 @@ if (!isset($_SESSION['user_id'])) {
                         if (response.status === 'success') {
                             const data = response.data;
                             $('#full-name').val(data.full_name);
+                            $('#pro-name').html(data.full_name);
                             $('#email').val(data.email);
+                            $('#pro-email').html(data.email);
                             $('#phone').val(data.phone);
                             $('#address').val(data.address);
                             if (data.profile_picture) {

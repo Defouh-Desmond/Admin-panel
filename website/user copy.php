@@ -34,7 +34,7 @@
                 <div class="container">
 
                 <!-- logo -->
-                <a href="index.html" class="logo">
+                <a href="index.php" class="logo">
                     <img src="img/logo.png" alt="logo">
                     <h2>LICRESTOR</h2>
                 </a>
@@ -64,9 +64,9 @@
 
                     <!-- nav -->
                     <ul class="main-nav nav navbar-nav">
-						<li><a href="index.html">Home</a></li>
+						<li><a href="index.php">Home</a></li>
 						<li><a href="menu.html">Menu</a></li>
-						<li><a href="reservation.html">Reservation</a></li>
+						<li><a href="reservation.php">Reservation</a></li>
 						<li><a href="event.html">Events</a></li>
 						<li><a href="about.html">About</a></li>
 						<li><a href="contact.php">Contact</a></li>

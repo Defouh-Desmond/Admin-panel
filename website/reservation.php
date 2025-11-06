@@ -1,3 +1,7 @@
+<?php
+    session_start();
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -37,7 +41,7 @@
             <div class="container">
 
                 <!-- logo -->
-                <a href="index.html" class="logo">
+                <a href="index.php" class="logo">
                     <img src="img/logo.png" alt="logo">
                     <h2>LICRESTOR</h2>
                 </a>
@@ -68,12 +72,12 @@
 
                     <!-- nav -->
                     <ul class="main-nav nav navbar-nav">
-                        <li><a href="index.html">Home</a></li>
+                        <li><a href="index.php">Home</a></li>
                         <li><a href="menu.html">Menu</a></li>
-                        <li><a href="reservation.html">Reservation</a></li>
+                        <li><a href="reservation.php">Reservation</a></li>
                         <li><a href="event.html">Events</a></li>
                         <li><a href="about.html">About</a></li>
-                        <li><a href="contact.php">Contact</a></li>
+                        <li><a href="contact.html">Contact</a></li>
                     </ul>
                     <!-- /nav -->
 
@@ -155,7 +159,7 @@
             </div>
 
             <div class="col-md-12" style="text-align: center; margin-top: 20px;">
-                <a href="reservation.html#reservation-form" class="main-button">Reservation Form</a>
+                <a href="reservation.php#reservation-form" class="main-button">Reservation Form</a>
             </div>
         </div>
     </div>
@@ -258,21 +262,31 @@
                         <h2 class="title">Make a Reservation</h2>
                         <p>Fill out the form below to reserve your table at LIC Restaurant.</p>
                     </div>
-                    <form action="#" method="post" class="reservation-form">
+
+                    <p id="reservation-success" class="text-success text-center" style="display:none;"></p>
+                    <p id="reservation-error" class="text-danger text-center" style="display:none;"></p>
+
+                    <form id="reservation-form-js" class="reservation-form">
                         <div class="row">
                             <div class="col-md-6 col-sm-12">
-                                <input type="text" name="name" class="input" placeholder="Your Name" required>
+                                <input type="text" name="name" class="input" placeholder="Your Name" 
+                                    value="<?php echo isset($_SESSION['full_name']) ? htmlspecialchars($_SESSION['full_name']) : ''; ?>"
+                                    <?php echo isset($_SESSION['full_name']) ? 'readonly' : '' ; ?>
+                                    required>
                             </div>
                             <div class="col-md-6 col-sm-12">
-                                <input type="email" name="email" class="input" placeholder="Your Email" required>
+                                <input type="email" name="email" class="input" placeholder="Your Email"
+                                    value="<?php echo isset($_SESSION['email']) ? htmlspecialchars($_SESSION['email']) : ''; ?>"
+                                    <?php echo isset($_SESSION['email']) ? 'readonly' : '' ; ?>
+                                    required>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-6 col-sm-12">
-                                <input type="text" name="phone" class="input" placeholder="Phone Number" required>
+                                <input type="tel" name="phone" class="input" placeholder="Phone Number" required pattern="[0-9]{8,15}" title="Enter a valid phone number">
                             </div>
                             <div class="col-md-6 col-sm-12">
-                                <input type="text" name="date" class="input" placeholder="Reservation Date" required>
+                                <input type="date" name="date" class="input" placeholder="Reservation Date" required id="reservation-date">
                             </div>
                         </div>
                         <div class="row">
@@ -280,14 +294,12 @@
                                 <input type="time" name="time" class="input" placeholder="Reservation Time" required>
                             </div>
                             <div class="col-md-6 col-sm-12">
-                                <input type="number" name="guests" class="input" placeholder="Number of Guests"
-                                    required>
+                                <input type="number" name="guests" class="input" placeholder="Number of Guests" required min="1">
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-12">
-                                <textarea name="message" class="input" placeholder="Special Requests (Optional)"
-                                    rows="4"></textarea>
+                                <textarea name="message" class="input" placeholder="Special Requests (Optional)" rows="4" maxlength="500"></textarea>
                             </div>
                         </div>
                         <div class="row text-center">
@@ -296,11 +308,47 @@
                             </div>
                         </div>
                     </form>
+
                 </div>
             </div>
         </div>
     </div>
     <!-- /Reservation Form Section -->
+
+    <!-- Success Modal -->
+    <div class="modal fade" id="reservationSuccessModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        <div class="modal-header bg-success">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title">Reservation Successful</h4>
+        </div>
+        <div class="modal-body" id="reservation-success-text"></div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-success" data-dismiss="modal">OK</button>
+        </div>
+        </div>
+    </div>
+    </div>
+    <!-- /Success Modal -->
+
+    <!-- Error Modal -->
+    <div class="modal fade" id="reservationErrorModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        <div class="modal-header bg-danger">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title">Reservation Error</h4>
+        </div>
+        <div class="modal-body" id="reservation-error-text"></div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+        </div>
+        </div>
+    </div>
+    </div>
+    <!-- /Error Modal -->
+
 
     <!-- Footer -->
     <footer id="footer">
@@ -389,9 +437,76 @@
     <script type="text/javascript" src="js/jquery.min.js"></script>
     <script type="text/javascript" src="js/bootstrap.min.js"></script>
     <script type="text/javascript" src="js/owl.carousel.min.js"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
-    <script type="text/javascript" src="js/google-map.js"></script>
     <script type="text/javascript" src="js/main.js"></script>
+
+    <script>
+    $(document).ready(function() {
+
+        const today = new Date().toISOString().split('T')[0];
+        $('#reservation-date').attr('min', today);
+
+        $('#reservation-form-js').on('submit', function(e) {
+            e.preventDefault();
+
+            const name = $('input[name="name"]').val().trim();
+            const email = $('input[name="email"]').val().trim();
+            const phone = $('input[name="phone"]').val().trim();
+            const date = $('input[name="date"]').val();
+            const time = $('input[name="time"]').val();
+            const guests = parseInt($('input[name="guests"]').val());
+            const message = $('textarea[name="message"]').val().trim();
+
+            const fail = (msg) => {
+                $('#reservation-error-text').text(msg);
+                $('#reservationErrorModal').modal('show');
+            };
+
+            if (!name || !email || !phone || !date || !time || !guests) {
+                return fail('Please fill in all required fields.');
+            }
+
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) return fail('Invalid email address.');
+
+            const phoneRegex = /^[0-9]{8,15}$/;
+            if (!phoneRegex.test(phone)) return fail('Invalid phone number.');
+
+            if (guests < 1) return fail('Guests must be at least 1.');
+
+            const now = new Date();
+            const reservationDateTime = new Date(date + " " + time);
+
+            // Apply rules
+            const diffHours = (reservationDateTime - now) / (1000 * 60 * 60);
+
+            if (guests < 8 && diffHours < 2)
+                return fail('Reservations for fewer than 8 guests must be made at least 2 hours in advance.');
+
+            if (guests >= 8 && diffHours < 24)
+                return fail('Reservations for 8 or more guests must be made at least 24 hours in advance.');
+
+            $.ajax({
+                url: 'include/reservation.php',
+                type: 'POST',
+                data: { name, email, phone, date, time, guests, message },
+                dataType: 'json',
+                success: function(r) {
+                    if (r.status === 'success') {
+                        $('#reservation-success-text').text(r.message);
+                        $('#reservationSuccessModal').modal('show');
+                        $('#reservation-form-js')[0].reset();
+                    } else {
+                        fail(r.message);
+                    }
+                },
+                error: function() {
+                    fail('Something went wrong. Please try again.');
+                }
+            });
+        });
+    });
+    </script>
+
 
 </body>
 

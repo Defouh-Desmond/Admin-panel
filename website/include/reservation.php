@@ -2,7 +2,15 @@
 session_start();
 header('Content-Type: application/json');
 
-require_once 'db_connect.php'; // Your DB connection
+// Optional: send email to admin
+require_once '../../vendor/phpmailer/phpmailer/src/PHPMailer.php';
+require_once '../../vendor/phpmailer/phpmailer/src/SMTP.php';
+require_once '../../vendor/phpmailer/phpmailer/src/Exception.php';
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+require_once '../../classes/connection.php';
 
 // Collect POST data
 $name    = trim($_POST['name'] ?? '');
@@ -60,13 +68,6 @@ $stmt = $mysqli->prepare("INSERT INTO reservations (user_id, name, email, phone,
 $stmt->bind_param("isssssis", $user_id, $name, $email, $phone, $date, $time, $guests, $message);
 
 if ($stmt->execute()) {
-    // Optional: send email to admin
-    require_once '../../vendor/phpmailer/phpmailer/src/PHPMailer.php';
-    require_once '../../vendor/phpmailer/phpmailer/src/SMTP.php';
-    require_once '../../vendor/phpmailer/phpmailer/src/Exception.php';
-
-    use PHPMailer\PHPMailer\PHPMailer;
-    use PHPMailer\PHPMailer\Exception;
 
     try {
         $mail = new PHPMailer(true);
