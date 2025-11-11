@@ -56,7 +56,7 @@
                 <!-- social links -->
                 <ul class="social-nav">
                     <li><a href="user.php" class="user" title="User Account Info"><i class="fa fa-user"></i></a></li>
-                    <li><a href="menu.html#cart-section" class="user" title="User Cart"><i
+                    <li><a href="menu.php#cart-section" class="user" title="User Cart"><i
                                 class="fa fa-shopping-cart"></i></a></li>
                 </ul>
                 <!-- /social links -->
@@ -73,7 +73,7 @@
                     <!-- nav -->
                     <ul class="main-nav nav navbar-nav">
                         <li><a href="index.php">Home</a></li>
-                        <li><a href="menu.html">Menu</a></li>
+                        <li><a href="menu.php">Menu</a></li>
                         <li><a href="reservation.php">Reservation</a></li>
                         <li><a href="event.html">Events</a></li>
                         <li><a href="about.html">About</a></li>
@@ -440,73 +440,84 @@
     <script type="text/javascript" src="js/main.js"></script>
 
     <script>
-    $(document).ready(function() {
+        $(document).ready(function() {
 
-        const today = new Date().toISOString().split('T')[0];
-        $('#reservation-date').attr('min', today);
+            const today = new Date().toISOString().split('T')[0];
+            $('#reservation-date').attr('min', today);
 
-        $('#reservation-form-js').on('submit', function(e) {
-            e.preventDefault();
+            $('#reservation-form-js').on('submit', function(e) {
+                e.preventDefault();
 
-            const name = $('input[name="name"]').val().trim();
-            const email = $('input[name="email"]').val().trim();
-            const phone = $('input[name="phone"]').val().trim();
-            const date = $('input[name="date"]').val();
-            const time = $('input[name="time"]').val();
-            const guests = parseInt($('input[name="guests"]').val());
-            const message = $('textarea[name="message"]').val().trim();
+                const submitBtn = $('.main-button');
+                const originalBtnText = submitBtn.html();
 
-            const fail = (msg) => {
-                $('#reservation-error-text').text(msg);
-                $('#reservationErrorModal').modal('show');
-            };
+                // Show loading state
+                submitBtn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Sending...');
 
-            if (!name || !email || !phone || !date || !time || !guests) {
-                return fail('Please fill in all required fields.');
-            }
+                const name = $('input[name="name"]').val().trim();
+                const email = $('input[name="email"]').val().trim();
+                const phone = $('input[name="phone"]').val().trim();
+                const date = $('input[name="date"]').val();
+                const time = $('input[name="time"]').val();
+                const guests = parseInt($('input[name="guests"]').val());
+                const message = $('textarea[name="message"]').val().trim();
 
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) return fail('Invalid email address.');
+                const fail = (msg) => {
+                    $('#reservation-error-text').text(msg);
+                    $('#reservationErrorModal').modal('show');
 
-            const phoneRegex = /^[0-9]{8,15}$/;
-            if (!phoneRegex.test(phone)) return fail('Invalid phone number.');
+                    // Restore button
+                    submitBtn.prop('disabled', false).html(originalBtnText);
+                };
 
-            if (guests < 1) return fail('Guests must be at least 1.');
-
-            const now = new Date();
-            const reservationDateTime = new Date(date + " " + time);
-
-            // Apply rules
-            const diffHours = (reservationDateTime - now) / (1000 * 60 * 60);
-
-            if (guests < 8 && diffHours < 2)
-                return fail('Reservations for fewer than 8 guests must be made at least 2 hours in advance.');
-
-            if (guests >= 8 && diffHours < 24)
-                return fail('Reservations for 8 or more guests must be made at least 24 hours in advance.');
-
-            $.ajax({
-                url: 'include/reservation.php',
-                type: 'POST',
-                data: { name, email, phone, date, time, guests, message },
-                dataType: 'json',
-                success: function(r) {
-                    if (r.status === 'success') {
-                        $('#reservation-success-text').text(r.message);
-                        $('#reservationSuccessModal').modal('show');
-                        $('#reservation-form-js')[0].reset();
-                    } else {
-                        fail(r.message);
-                    }
-                },
-                error: function() {
-                    fail('Something went wrong. Please try again.');
+                if (!name || !email || !phone || !date || !time || !guests) {
+                    return fail('Please fill in all required fields.');
                 }
+
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email)) return fail('Invalid email address.');
+
+                const phoneRegex = /^[0-9]{8,15}$/;
+                if (!phoneRegex.test(phone)) return fail('Invalid phone number.');
+
+                if (guests < 1) return fail('Guests must be at least 1.');
+
+                const now = new Date();
+                const reservationDateTime = new Date(date + " " + time);
+
+                const diffHours = (reservationDateTime - now) / (1000 * 60 * 60);
+
+                if (guests < 8 && diffHours < 2)
+                    return fail('Reservations for fewer than 8 guests must be made at least 2 hours in advance.');
+
+                if (guests >= 8 && diffHours < 24)
+                    return fail('Reservations for 8 or more guests must be made at least 24 hours in advance.');
+
+                $.ajax({
+                    url: 'include/reservation.php',
+                    type: 'POST',
+                    data: { name, email, phone, date, time, guests, message },
+                    dataType: 'json',
+                    success: function(r) {
+                        if (r.status === 'success') {
+                            $('#reservation-success-text').text(r.message);
+                            $('#reservationSuccessModal').modal('show');
+                            $('#reservation-form-js')[0].reset();
+                        } else {
+                            fail(r.message);
+                            return;
+                        }
+
+                        // Restore button after success modal opens
+                        submitBtn.prop('disabled', false).html(originalBtnText);
+                    },
+                    error: function() {
+                        fail('Something went wrong. Please try again.');
+                    }
+                });
             });
         });
-    });
     </script>
-
 
 </body>
 

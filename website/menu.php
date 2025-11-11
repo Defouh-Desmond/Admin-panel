@@ -1,3 +1,41 @@
+<?php
+require_once '../classes/connection.php';
+
+// Fetch active categories
+$categoryQuery = $mysqli->query("SELECT category_id, name, slug FROM categories WHERE status='active' ORDER BY name ASC");
+if (!$categoryQuery) {
+    die("Category Query Error: " . $mysqli->error);
+}
+
+// Product Query
+$productQuery = $mysqli->query("
+    SELECT 
+        p.product_id, p.name, p.description, p.price, p.old_price, c.slug,
+        (
+            SELECT image_path 
+            FROM product_images 
+            WHERE product_id = p.product_id 
+            AND is_main = 1 
+            LIMIT 1
+        ) AS main_image
+    FROM products p
+    INNER JOIN categories c ON p.category_id = c.category_id
+    WHERE p.status = 'active'
+    ORDER BY p.product_id DESC
+");
+
+if (!$productQuery) {
+    die("Product Query Error: " . $mysqli->error);
+}
+
+
+$products = [];
+while ($row = $productQuery->fetch_assoc()) {
+    $products[$row['slug']][] = $row;
+}
+?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -52,7 +90,7 @@
                 <!-- social links -->
                 <ul class="social-nav">
                     <li><a href="user.php" class="user" title="User Account Info"><i class="fa fa-user"></i></a></li>
-                    <li><a href="menu.html#cart-section" class="user" title="User Cart"><i
+                    <li><a href="menu.php#cart-section" class="user" title="User Cart"><i
                                 class="fa fa-shopping-cart"></i></a></li>
                 </ul>
                 <!-- /social links -->
@@ -69,7 +107,7 @@
                     <!-- nav -->
                     <ul class="main-nav nav navbar-nav">
                         <li><a href="index.php">Home</a></li>
-                        <li><a href="menu.html">Menu</a></li>
+                        <li><a href="menu.php">Menu</a></li>
                         <li><a href="reservation.php">Reservation</a></li>
                         <li><a href="event.html">Events</a></li>
                         <li><a href="about.html">About</a></li>
@@ -134,207 +172,74 @@
                     <p>Explore our delicious selection of meals, drinks, and desserts — freshly prepared for you.</p>
                 </div>
 
-                <!-- MENU + CART -->
+                <!-- MENU SECTION -->
                 <div class="col-md-8 menu-section">
+
+                    <!-- CATEGORY TABS -->
                     <ul class="nav nav-tabs" role="tablist">
-                        <li class="active"><a href="#lunch" role="tab" data-toggle="tab">Lunch</a></li>
-                        <li><a href="#drinks" role="tab" data-toggle="tab">Drinks</a></li>
-                        <li><a href="#dessert" role="tab" data-toggle="tab">Dessert</a></li>
-                        <li><a href="#dinner" role="tab" data-toggle="tab">Dinner</a></li>
+                        <?php 
+                        $activeTab = true;
+                        $categoryQuery->data_seek(0);
+                        while ($cat = $categoryQuery->fetch_assoc()): ?>
+                            <li class="<?php if ($activeTab){echo 'active'; $activeTab=false;} ?>">
+                                <a href="#<?php echo $cat['slug']; ?>" role="tab" data-toggle="tab">
+                                    <?php echo htmlspecialchars($cat['name']); ?>
+                                </a>
+                            </li>
+                        <?php endwhile; ?>
                     </ul>
 
                     <div class="tab-content" style="margin-top:20px;">
-                        <!-- LUNCH TAB -->
-                        <div class="tab-pane fade in active" id="lunch">
-                            <div class="row">
-                                <div class="col-sm-6">
-                                    <div class="meal" data-name="Grilled Chicken" data-price="400">
-                                        <img src="img/background01.jpg" alt="Meal 1">
-                                        <div class="details">
-                                            <h4 class="name">Grilled Chicken</h4>
-                                            <div class="price">
-                                                <p>400FCFA</p>
-                                                <strike>700FCFA</strike>
-                                            </div>
-                                        </div>
-                                        <p>Delicious grilled chicken served with salad.</p>
-                                        <button class="btn btn-block main-button add-to-cart">Add to Cart</button>
-                                    </div>
-                                </div>
-                                <div class="col-sm-6">
-                                    <div class="meal" data-name="Beef Burger" data-price="400">
-                                        <img src="img/background02.jpg" alt="Meal 2">
-                                        <div class="details">
-                                            <h4 class="name">Beef Burger</h4>
-                                            <div class="price">
-                                                <p>400FCFA</p>
-                                                <strike>700FCFA</strike>
-                                            </div>
-                                        </div>
-                                        <p>Juicy burger with cheese and fries.</p>
-                                        <button class="btn btn-block main-button add-to-cart">Add to Cart</button>
-                                    </div>
-                                </div>
-                                <div class="col-sm-6">
-                                    <div class="meal" data-name="Vegetable Pasta" data-price="400">
-                                        <img src="img/background03.jpg" alt="Meal 3">
-                                        <div class="details">
-                                            <h4 class="name">Vegetable Pasta</h4>
-                                            <div class="price">
-                                                <p>400FCFA</p>
-                                                <strike>700FCFA</strike>
-                                            </div>
-                                        </div>
-                                        <p>Fresh pasta with seasonal vegetables.</p>
-                                        <button class="btn btn-block main-button add-to-cart">Add to Cart</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
 
-                        <!-- DRINKS TAB -->
-                        <div class="tab-pane fade" id="drinks">
+                        <?php
+                        $activePane = true;
+                        $categoryQuery->data_seek(0);
+                        while ($cat = $categoryQuery->fetch_assoc()):
+                            $slug = $cat['slug'];
+                        ?>
+                        <div class="tab-pane fade in <?php if($activePane){echo 'active'; $activePane=false;} ?>" id="<?php echo $slug; ?>">
                             <div class="row">
-                                <div class="col-sm-6">
-                                    <div class="meal" data-name="Orange Juice" data-price="400">
-                                        <img src="img/background02.jpg" alt="Drink 1">
-                                        <div class="details">
-                                            <h4 class="name">Orange Juice</h4>
-                                            <div class="price">
-                                                <p>400FCFA</p>
-                                                <strike>700FCFA</strike>
-                                            </div>
-                                        </div>
-                                        <p>Freshly squeezed orange juice.</p>
-                                        <button class="btn btn-block main-button add-to-cart">Add to Cart</button>
-                                    </div>
-                                </div>
-                                <div class="col-sm-6">
-                                    <div class="meal" data-name="Cold Coffee" data-price="400">
-                                        <img src="img/background02.jpg" alt="Drink 2">
-                                        <div class="details">
-                                            <h4 class="name">Cold Coffee</h4>
-                                            <div class="price">
-                                                <p>400FCFA</p>
-                                                <strike>700FCFA</strike>
-                                            </div>
-                                        </div>
-                                        <p>Chilled coffee with cream and ice.</p>
-                                        <button class="btn btn-block main-button add-to-cart">Add to Cart</button>
-                                    </div>
-                                </div>
-                                <div class="col-sm-6">
-                                    <div class="meal" data-name="Smoothie" data-price="400">
-                                        <img src="img/background02.jpg" alt="Drink 3">
-                                        <div class="details">
-                                            <h4 class="name">Smoothie</h4>
-                                            <div class="price">
-                                                <p>400FCFA</p>
-                                                <strike>700FCFA</strike>
-                                            </div>
-                                        </div>
-                                        <p>Banana and strawberry smoothie.</p>
-                                        <button class="btn btn-block main-button add-to-cart">Add to Cart</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                                
+                                <?php if(isset($products[$slug])): ?>
+                                    <?php foreach($products[$slug] as $meal): ?>
 
-                        <!-- DESSERT TAB -->
-                        <div class="tab-pane fade" id="dessert">
-                            <div class="row">
-                                <div class="col-sm-6">
-                                    <div class="meal" data-name="Chocolate Cake" data-price="400">
-                                        <img src="img/background02.jpg" alt="Dessert 1">
-                                        <div class="details">
-                                            <h4 class="name">Chocolate Cake</h4>
-                                            <div class="price">
-                                                <p>400FCFA</p>
-                                                <strike>700FCFA</strike>
-                                            </div>
-                                        </div>
-                                        <p>Rich chocolate cake with icing.</p>
-                                        <button class="btn btn-block main-button add-to-cart">Add to Cart</button>
-                                    </div>
-                                </div>
-                                <div class="col-sm-6">
-                                    <div class="meal" data-name="Ice Cream" data-price="400">
-                                        <img src="img/background02.jpg" alt="Dessert 2">
-                                        <div class="details">
-                                            <h4 class="name">Ice Cream</h4>
-                                            <div class="price">
-                                                <p>400FCFA</p>
-                                                <strike>700FCFA</strike>
-                                            </div>
-                                        </div>
-                                        <p>Vanilla and chocolate ice cream scoops.</p>
-                                        <button class="btn btn-block main-button add-to-cart">Add to Cart</button>
-                                    </div>
-                                </div>
-                                <div class="col-sm-6">
-                                    <div class="meal" data-name="Fruit Salad" data-price="400">
-                                        <img src="img/background02.jpg" alt="Dessert 3">
-                                        <div class="details">
-                                            <h4 class="name">Fruit Salad</h4>
-                                            <div class="price">
-                                                <p>400FCFA</p>
-                                                <strike>700FCFA</strike>
-                                            </div>
-                                        </div>
-                                        <p>Mixed fruits with cream topping.</p>
-                                        <button class="btn btn-block main-button add-to-cart">Add to Cart</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                                        <?php 
+                                            $image = $meal['main_image']; 
+                                        ?>
 
-                        <!-- DINNER TAB -->
-                        <div class="tab-pane fade" id="dinner">
-                            <div class="row">
-                                <div class="col-sm-6">
-                                    <div class="meal" data-name="Steak" data-price="400">
-                                        <img src="img/background02.jpg" alt="Dinner 1">
-                                        <div class="details">
-                                            <h4 class="name">Steak</h4>
-                                            <div class="price">
-                                                <p>400FCFA</p>
-                                                <strike>700FCFA</strike>
+                                        <div class="col-sm-6">
+                                            <div class="meal" data-name="<?php echo htmlspecialchars($meal['name']); ?>" data-price="<?php echo $meal['price']; ?>">
+                                                <img src="<?php echo $image ? "../uploads/Products/$image" : "img/image01.jpg"; ?>" 
+                                                alt="<?php echo htmlspecialchars($meal['name']); ?>" 
+                                                style="width:100%; height:200px; object-fit:cover;">
+
+                                                
+                                                <div class="details">
+                                                    <h4 class="name"><?php echo htmlspecialchars($meal['name']); ?></h4>
+                                                    <div class="price">
+                                                        <p><?php echo $meal['price']; ?> FCFA</p>
+                                                        <?php if(!empty($meal['old_price']) && $meal['old_price'] > $meal['price']): ?>
+                                                            <strike><?php echo $meal['old_price']; ?> FCFA</strike>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                </div>
+
+                                                <p><?php echo htmlspecialchars($meal['description']); ?></p>
+
+                                                <button class="btn btn-block main-button add-to-cart">
+                                                    Add to Cart
+                                                </button>
                                             </div>
                                         </div>
-                                        <p>Grilled steak with mashed potatoes.</p>
-                                        <button class="btn btn-block main-button add-to-cart">Add to Cart</button>
-                                    </div>
-                                </div>
-                                <div class="col-sm-6">
-                                    <div class="meal" data-name="Seafood Platter" data-price="400">
-                                        <img src="img/background02.jpg" alt="Dinner 2">
-                                        <div class="details">
-                                            <h4 class="name">Seafood Platter</h4>
-                                            <div class="price">
-                                                <p>400FCFA</p>
-                                                <strike>700FCFA</strike>
-                                            </div>
-                                        </div>
-                                        <p>Fresh seafood served with lemon sauce.</p>
-                                        <button class="btn btn-block main-button add-to-cart">Add to Cart</button>
-                                    </div>
-                                </div>
-                                <div class="col-sm-6">
-                                    <div class="meal" data-name="Vegetable Stir Fry" data-price="400">
-                                        <img src="img/background02.jpg" alt="Dinner 3">
-                                        <div class="details">
-                                            <h4 class="name">Vegetable Stir Fry</h4>
-                                            <div class="price">
-                                                <p>400FCFA</p>
-                                                <strike>700FCFA</strike>
-                                            </div>
-                                        </div>
-                                        <p>Stir-fried veggies with noodles.</p>
-                                        <button class="btn btn-block main-button add-to-cart">Add to Cart</button>
-                                    </div>
-                                </div>
+
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <p style="padding:10px;">No meals available in this category.</p>
+                                <?php endif; ?>
+
                             </div>
                         </div>
+                        <?php endwhile; ?>
 
                     </div>
                 </div>
@@ -637,8 +542,6 @@
     <script type="text/javascript" src="js/jquery.min.js"></script>
     <script type="text/javascript" src="js/bootstrap.min.js"></script>
     <script type="text/javascript" src="js/owl.carousel.min.js"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
-    <script type="text/javascript" src="js/google-map.js"></script>
     <script type="text/javascript" src="js/main.js"></script>
     <script>
         $(function () {

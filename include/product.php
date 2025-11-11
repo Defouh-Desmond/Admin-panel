@@ -20,10 +20,10 @@ $admin_result = $stmt->get_result();
 $admin = $admin_result->fetch_assoc();
 $stmt->close();
 
-if (!$admin || !in_array($admin['role'], ['main_admin', 'manager'])) {
-    echo json_encode(['status' => 'error', 'message' => 'Access denied. You do not have permission to perform this action.']);
-    exit;
-}
+// if (!$admin || !in_array($admin['role'], ['main_admin', 'manager'])) {
+//     echo json_encode(['status' => 'error', 'message' => 'Access denied. You do not have permission to perform this action.']);
+//     exit;
+// }
 
 // =============================
 // MAIN ACTION HANDLER

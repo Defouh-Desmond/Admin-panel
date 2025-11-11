@@ -59,7 +59,7 @@ if (!isset($_SESSION['user_id'])) {
                 <!-- social links -->
                 <ul class="social-nav">
                     <li><a href="user.php" class="user" title="User Account Info"><i class="fa fa-user"></i></a></li>
-                    <li><a href="menu.html#cart-section" class="user" title="User Cart"><i class="fa fa-shopping-cart"></i></a></li>
+                    <li><a href="menu.php#cart-section" class="user" title="User Cart"><i class="fa fa-shopping-cart"></i></a></li>
                 </ul>
                 <!-- /social links -->
 
@@ -75,7 +75,7 @@ if (!isset($_SESSION['user_id'])) {
                     <!-- nav -->
                     <ul class="main-nav nav navbar-nav">
 						<li><a href="index.php">Home</a></li>
-						<li><a href="menu.html">Menu</a></li>
+						<li><a href="menu.php">Menu</a></li>
 						<li><a href="reservation.php">Reservation</a></li>
 						<li><a href="event.html">Events</a></li>
 						<li><a href="about.html">About</a></li>

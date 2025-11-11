@@ -52,7 +52,7 @@
                 <!-- social links -->
                 <ul class="social-nav">
                     <li><a href="user.php" class="user" title="User Account Info"><i class="fa fa-user"></i></a></li>
-                    <li><a href="menu.html#cart-section" class="user" title="User Cart"><i
+                    <li><a href="menu.php#cart-section" class="user" title="User Cart"><i
                                 class="fa fa-shopping-cart"></i></a></li>
                 </ul>
                 <!-- /social links -->
@@ -69,7 +69,7 @@
                     <!-- nav -->
                     <ul class="main-nav nav navbar-nav">
                         <li><a href="index.php">Home</a></li>
-                        <li><a href="menu.html">Menu</a></li>
+                        <li><a href="menu.php">Menu</a></li>
                         <li><a href="reservation.php">Reservation</a></li>
                         <li><a href="event.html">Events</a></li>
                         <li><a href="about.html">About</a></li>
@@ -116,7 +116,7 @@
                             <h4 class="white-text lead">Where great taste meets comfort. Fresh dishes made to delight
                                 every moment.</h4>
                             <div class="flex" style="margin-top:20px;">
-                                <a href="menu.html" class="main-button">View Menu</a>
+                                <a href="menu.php" class="main-button">View Menu</a>
                                 <a href="reservation.php" class="main-button" style="margin-left: 10px;">Reserve</a>
                             </div>
                         </div>
@@ -442,7 +442,7 @@
 
                     <!-- ORDER BUTTON -->
                     <div class="col-md-12" style="text-align: center; margin-top: 20px;">
-                        <a href="menu.html" class="main-button">Order Now</a>
+                        <a href="menu.php" class="main-button">Order Now</a>
                     </div>
                     <!-- /ORDER BUTTON -->
 
